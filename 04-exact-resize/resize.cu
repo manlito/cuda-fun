@@ -50,7 +50,7 @@ void resize(float *const input_image,
             const int scale,
             float* result) {
     
-    constexpr int BLOCK_SIZE = 256;
+    constexpr int BLOCK_SIZE = 64;
     dim3 block_size(BLOCK_SIZE, 1);
     const int target_width = width / scale;
     const int target_height = height / scale;
@@ -64,6 +64,9 @@ void resize(float *const input_image,
             input_image, width, height, target_width, target_height, result);
     } else if (scale == 4) {
         downscale<4><<<grid_size, block_size, shared_memory_size>>>(
+            input_image, width, height, target_width, target_height, result);
+    } else if (scale == 8) {
+        downscale<8><<<grid_size, block_size, shared_memory_size>>>(
             input_image, width, height, target_width, target_height, result);
     }
     
