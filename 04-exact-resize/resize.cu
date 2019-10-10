@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include "error_check.h"
 
 template <int KERNEL_SIZE>
 __global__
@@ -34,6 +35,7 @@ void downscale(
     const int target_col = x;
     if (x < target_width) {
         float *result_ptr = &result[target_row + target_col];
+        *result_ptr = 0;
         for (int kernel_y = 0; kernel_y < KERNEL_SIZE; kernel_y++) {
             const int row_shared = kernel_y * blockDim.x * KERNEL_SIZE;
             for (int kernel_x = 0; kernel_x < KERNEL_SIZE; kernel_x++) {
@@ -48,7 +50,8 @@ void resize(float *const input_image,
             const int width,
             const int height,
             const int scale,
-            float* result) {
+            float* result, 
+            cudaStream_t *stream) {
     
     constexpr int BLOCK_SIZE = 64;
     dim3 block_size(BLOCK_SIZE, 1);
@@ -59,15 +62,23 @@ void resize(float *const input_image,
 
     std::cout << "Launching kernel " << grid_size.x << " x " << grid_size.y << std::endl;
 
-    if (scale == 2) {
-        downscale<2><<<grid_size, block_size, shared_memory_size>>>(
-            input_image, width, height, target_width, target_height, result);
-    } else if (scale == 4) {
-        downscale<4><<<grid_size, block_size, shared_memory_size>>>(
-            input_image, width, height, target_width, target_height, result);
-    } else if (scale == 8) {
-        downscale<8><<<grid_size, block_size, shared_memory_size>>>(
-            input_image, width, height, target_width, target_height, result);
+    if (stream == nullptr) {
+        if (scale == 2) {
+            downscale<2><<<grid_size, block_size, shared_memory_size>>>(
+                input_image, width, height, target_width, target_height, result);
+        } else if (scale == 4) {
+            downscale<4><<<grid_size, block_size, shared_memory_size>>>(
+                input_image, width, height, target_width, target_height, result);
+        } else if (scale == 8) {
+            downscale<8><<<grid_size, block_size, shared_memory_size>>>(
+                input_image, width, height, target_width, target_height, result);
+        }
+    } else {
+        if (scale == 2) {
+            downscale<2><<<grid_size, block_size, shared_memory_size, *stream>>>(
+                input_image, width, height, target_width, target_height, result);
+            gpuErrchk( cudaPeekAtLastError() );
+        }
     }
     
 }

@@ -21,7 +21,19 @@ add_executable(cuda_fun_resize
     resize.cu
     )
 
+add_executable(cuda_fun_resize_from_dir
+    main-from-dir.cu
+    resize.cu
+    )
+
+add_executable(cuda_fun_resize_streams
+    main-from-dir-streams.cu
+    resize.cu
+    )
+
 include_directories(${JPEG_INCLUDE_DIRS})
 target_link_libraries(cuda_fun_resize ${JPEG_LIBRARIES})
+target_link_libraries(cuda_fun_resize_from_dir ${JPEG_LIBRARIES})
+target_link_libraries(cuda_fun_resize_streams ${JPEG_LIBRARIES})
 
 install(TARGETS cuda_fun_resize RUNTIME DESTINATION bin)
