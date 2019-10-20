@@ -85,7 +85,7 @@ void write_jpeg_image(const std::string &filename,
                       const std::vector<unsigned char> &image_data,
                       const int &width,
                       const int &height,
-                      const int &channels) {
+                      const int channels) {
 
     if (channels != 1 && channels != 3)
         throw std::runtime_error("Invalid image color space");
