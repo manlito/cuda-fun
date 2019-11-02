@@ -41,7 +41,7 @@ main(int argc, char **argv)
         {
             auto nextJob = job_pool.getNextJob();
 
-            if (nextJob == "")
+            if (nextJob == "" && worker->image_alloc_size_source)
             {
                 safe_print("Freeing memory");
                 cudaFree(&(worker->input));
