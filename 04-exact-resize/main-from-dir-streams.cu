@@ -213,7 +213,7 @@ main(int argc, char **argv)
     std::vector <std::thread> workers;
     std::vector <Worker> workers_data;
     // Create workers
-    for (int worker_index = 1; worker_index <= 8; worker_index++)
+    for (int worker_index = 1; worker_index <= 16; worker_index++)
     {
         workers_data.push_back(Worker(worker_index));
     }
