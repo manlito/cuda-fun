@@ -2,7 +2,7 @@
 #include <vector>
 
 __global__
-void convolution_1d_x(float *const input_image,
+void convolution_1d_y(float *const input_image,
                       int width, 
                       int channels,
                       int kernel_size,
@@ -35,5 +35,5 @@ void blur_separable_gpu(float *const input_image,
     const dim3 blockSize(256, 1);
     const dim3 gridSize((width * 3 + blockSize.x - 1) / blockSize.x, height);
    
-    convolution_1d_x<<<gridSize, blockSize>>>(input_image, width, 3, 9, result);
+    convolution_1d_y<<<gridSize, blockSize>>>(input_image, width, 3, 9, result);
 }

@@ -2,7 +2,6 @@
 #include <mutex>
 #include <deque>
 #include <functional>
-#include <iostream>
 
 template <int DIMENSIONS=3>
 struct WorkerBaseUchar
