@@ -21,6 +21,8 @@ main(int argc, char **argv)
     }
     std::string dirname_input(argv[1]);
     std::string dirname_output(argv[2]);
+    const int scale = 2;
+    const int gpu_workers_count = 8;
 
     std::vector<std::string> files = std::vector<std::string>();
     getdir(dirname_input, files);
@@ -31,7 +33,7 @@ main(int argc, char **argv)
 
     typedef WorkerBaseUchar<3> Worker;
 
-    auto gpu_work = [&job_pool, &dirname_input, &dirname_output, &cout_mutex](Worker *worker)
+    auto gpu_work = [&job_pool, &dirname_input, &dirname_output, &cout_mutex, scale](Worker *worker)
     {
         auto safe_print = [&cout_mutex, &worker](const std::string &message) {
             std::lock_guard<std::mutex> lock_cout(cout_mutex);
@@ -54,16 +56,24 @@ main(int argc, char **argv)
 
                 safe_print("Next job is " + nextJob);
 
-                const int scale = 2;
-
+                auto input_image_allocation_function = [&worker](const int &allocation_size) -> void {
+                    if (worker->image_alloc_size_source < allocation_size) {
+                        // If already has some allocation clear
+                        if (worker->image_alloc_size_source > 0) {
+                            gpuErrchk(cudaFree(&worker->input));
+                        }
+                        gpuErrchk(cudaMallocManaged(&worker->input, allocation_size, cudaMemAttachHost));
+                        gpuErrchk(cudaStreamAttachMemAsync(worker->stream, worker->input, allocation_size));
+                        worker->image_alloc_size_source = allocation_size;
+                    }
+                };
                 int channels;
                 read_jpeg_image_cu(dirname_input + "/" + nextJob,
                                    worker->source_width,
                                    worker->source_height,
                                    channels,
-                                   worker->image_alloc_size_source,
-                                   &worker->input,
-                                   (void *)&worker->stream);
+                                   input_image_allocation_function,
+                                   &worker->input);
 
                 if (channels != Worker::CHANNELS)
                 {
@@ -107,9 +117,9 @@ main(int argc, char **argv)
     };
 
     std::vector<std::thread> workers;
-    std::vector<Worker> workers_data(16);
+    std::vector<Worker> workers_data(gpu_workers_count);
     // Assign Ids
-    for (int worker_index = 1; worker_index <= 16; worker_index++)
+    for (int worker_index = 1; worker_index <= gpu_workers_count; worker_index++)
     {
         workers_data.at(worker_index - 1).id = worker_index;
     }

@@ -21,9 +21,8 @@ read_jpeg_image_cu(const std::string &filename,
                    int &width,
                    int &height,
                    int &channels,
-                   int &current_allocation_size,
-                   unsigned char **image_data,
-                   void *stream)
+                   std::function<void(const int &new_allocation)> allocation_function,
+                   unsigned char **image_data)
 {
 
     FILE *fp = std::fopen(filename.c_str(), "rb");
@@ -56,20 +55,8 @@ read_jpeg_image_cu(const std::string &filename,
         channels = (cinfo.out_color_space == JCS_RGB ? 3 : 1);
 
         const int allocation_size = (width * height * channels);
-        if (current_allocation_size < allocation_size) {
-            // If already has some allocation clear
-            if (current_allocation_size > 0) {
-                gpuErrchk(cudaFree(image_data));
-            }
-            if (stream == nullptr) {
-                gpuErrchk(cudaMallocManaged(image_data, allocation_size));
-            } else {
-                gpuErrchk(cudaMallocManaged(image_data, allocation_size));
-                gpuErrchk(cudaMallocManaged(image_data, allocation_size, cudaMemAttachHost));
-                gpuErrchk(cudaStreamAttachMemAsync(*((cudaStream_t*)stream), *image_data, allocation_size));
-            }
-            current_allocation_size = allocation_size;
-        }
+        /* Allocate memory for this image */
+        allocation_function(allocation_size);
 
         /* Start decompression. */
         jpeg_start_decompress(&cinfo);

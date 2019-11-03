@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <string>
 #include <vector>
+#include <functional>
 #include <jpeglib.h>
 
 void
@@ -22,9 +23,8 @@ read_jpeg_image_cu(const std::string &filename,
                    int &width,
                    int &height,
                    int &channels,
-                   int &current_allocation_size,
-                   unsigned char **image_data,
-                   void *stream = nullptr);
+                   std::function<void(const int &new_allocation)> allocation_function,
+                   unsigned char **image_data);
 
 void
 read_jpeg_image(const std::string &filename,
