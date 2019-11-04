@@ -17,10 +17,20 @@ int main(int argc, char **argv) {
     int width;
     int height;
     int channels;
-    const int scale = 2;
+    const int scale = 8;
     
     int allocation_size_source = 0;
-    read_jpeg_image_cu(filename_input, width, height, channels, allocation_size_source, &input);
+    auto input_image_allocation_function = [&allocation_size_source, &input](const int &allocation_size) -> void {
+        if (allocation_size_source < allocation_size) {
+            // If already has some allocation clear
+            if (allocation_size_source > 0) {
+                gpuErrchk(cudaFree(&input));
+            }
+            gpuErrchk(cudaMallocManaged(&input, allocation_size));
+            allocation_size_source = allocation_size;
+        }
+    };
+    read_jpeg_image_cu(filename_input, width, height, channels, input_image_allocation_function, &input);
 
     std::cout << "Read image: " << width << " x " << height << " x " << channels << std::endl;
 

@@ -21,7 +21,7 @@ main(int argc, char **argv)
     }
     std::string dirname_input(argv[1]);
     std::string dirname_output(argv[2]);
-    const int scale = 2;
+    const int scale = 4;
     const int gpu_workers_count = 8;
 
     std::vector<std::string> files = std::vector<std::string>();
