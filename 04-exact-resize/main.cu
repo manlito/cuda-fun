@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
     
     std::string filename_output(argv[2]);
     std::cout << "Saving " << filename_output << std::endl;
-    write_jpeg_image(filename_output, image_result, target_width, target_height, channels);
+    write_jpeg_image(filename_output.data(), image_result.data(), target_width, target_height, channels);
     
     for (int channel = 0; channel < channels; channel++) {
         cudaFree(&(image_device[channel]));

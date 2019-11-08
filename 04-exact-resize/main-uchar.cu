@@ -30,7 +30,10 @@ int main(int argc, char **argv) {
             allocation_size_source = allocation_size;
         }
     };
-    read_jpeg_image_cu(filename_input, width, height, channels, input_image_allocation_function, &input);
+    auto get_ptr_function = [&input]() -> unsigned char ** {
+        return &input;
+    };
+    read_jpeg_image_cu(filename_input, width, height, channels, input_image_allocation_function, get_ptr_function);
 
     std::cout << "Read image: " << width << " x " << height << " x " << channels << std::endl;
 

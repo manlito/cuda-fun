@@ -24,7 +24,7 @@ read_jpeg_image_cu(const std::string &filename,
                    int &height,
                    int &channels,
                    std::function<void(const int &new_allocation)> allocation_function,
-                   unsigned char **image_data);
+                   std::function<unsigned char **()> get_ptr_function);
 
 void
 read_jpeg_image(const std::string &filename,

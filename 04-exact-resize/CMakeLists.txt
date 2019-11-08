@@ -38,14 +38,13 @@ add_executable(cuda_fun_resize_uchar
         main-uchar.cu
         resize-uchar.cu
         resize.cu
-        image.cu
         image.cpp
         )
 
 add_executable(cuda_fun_resize_streams_uchar
         main-from-dir-streams-uchar.cu
+        resize-uchar-cpu.cpp
         resize-uchar.cu
-        image.cu
         image.cpp
         )
 

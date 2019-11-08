@@ -4,14 +4,16 @@
 #include <functional>
 
 template <int DIMENSIONS=3>
-struct WorkerBaseUchar
+struct GPUWorkerBaseUchar
 {
-    WorkerBaseUchar()
+    static constexpr int CHANNELS = DIMENSIONS;
+
+    GPUWorkerBaseUchar()
     {
         cudaStreamCreate(&stream);
     }
 
-    ~WorkerBaseUchar()
+    ~GPUWorkerBaseUchar()
     {
         cudaStreamDestroy(stream);
     }
@@ -23,7 +25,6 @@ struct WorkerBaseUchar
 
     int source_width;
     int source_height;
-    static constexpr int CHANNELS = DIMENSIONS;
     int image_alloc_size_source{0};
 
     int target_width;
@@ -33,3 +34,20 @@ struct WorkerBaseUchar
     cudaStream_t stream;
 };
 
+
+template <int DIMENSIONS=3>
+struct CPUWorkerBaseUchar
+{
+    static constexpr int CHANNELS = DIMENSIONS;
+
+    int id{0};
+
+    std::vector<unsigned char> input;
+    std::vector<unsigned char> output;
+
+    int source_width;
+    int source_height;
+
+    int target_width;
+    int target_height;
+};
